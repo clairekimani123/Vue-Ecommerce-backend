@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'quantity', // Kept as per migration
+    ];
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function vendor()
+{
+    return $this->belongsTo(Vendor::class, 'vendor_id');
+}
+
+    public function supplier()
+{
+    return $this->belongsTo(Supplier::class, 'supplier_id');
+}
+
+
+}
