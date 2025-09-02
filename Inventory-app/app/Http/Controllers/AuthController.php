@@ -28,13 +28,13 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $customer->createToken('customer-token')->plainTextToken;
+        // $token = $customer->createToken('customer-token')->plainTextToken;
 
-        return response()->json([
-            'user'  => $customer,
-            'token' => $token,
-            'role'  => 'customer'
-        ], 201);
+        // return response()->json([
+        //     'user'  => $customer,
+        //     'token' => $token,
+        //     'role'  => 'customer'
+        // ], 201);
     }
 
     // ✅ Login Customer
@@ -79,13 +79,13 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $supplier->createToken('supplier-token')->plainTextToken;
+        // $token = $supplier->createToken('supplier-token')->plainTextToken;
 
-        return response()->json([
-            'user'  => $supplier,
-            'token' => $token,
-            'role'  => 'supplier'
-        ], 201);
+        // return response()->json([
+        //     'user'  => $supplier,
+        //     'token' => $token,
+        //     'role'  => 'supplier'
+        // ], 201);
     }
 
     // ✅ Login Supplier

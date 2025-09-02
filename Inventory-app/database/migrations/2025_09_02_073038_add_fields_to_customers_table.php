@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('customers', function (Blueprint $table) {
+            $table->string('location')->nullable()->after('phone');
+            $table->string('password')->after('location');
+            $table->rememberToken(); // optional, if you want "remember me" functionality
+            $table->timestamp('email_verified_at')->nullable(); // optional, if you plan verification
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('customers', function (Blueprint $table) {
+            $table->dropColumn(['location', 'password', 'remember_token', 'email_verified_at']);
+        });
+    }
+};

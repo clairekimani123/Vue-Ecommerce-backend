@@ -7,11 +7,6 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum')->only(['store', 'update', 'destroy']);
-    }
-
     public function index()
     {
         return Product::all();
@@ -21,9 +16,9 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
+            'quantity' => 'required|integer',
             'price' => 'required|numeric',
-            'quantity' => 'integer|min:0',
         ]);
 
         return Product::create($validated);
@@ -36,20 +31,13 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $validated = $request->validate([
-            'name' => 'string',
-            'description' => 'nullable|string',
-            'price' => 'numeric',
-            'quantity' => 'integer|min:0',
-        ]);
-
-        $product->update($validated);
+        $product->update($request->all());
         return $product;
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
-        return response()->json(['message' => 'Deleted']);
+        return response()->noContent();
     }
 }
