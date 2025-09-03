@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -15,50 +16,97 @@ class OrderController extends Controller
 
     public function index()
     {
-        return Order::with('items.product', 'customer')->get();
+        $orders = Order::with('items.product', 'customer')->get();
+
+        return $orders->map(function ($order) {
+            return [
+                'id'             => $order->id,
+                'customer_id'    => $order->customer_id,
+                'total_quantity' => $order->total_quantity,
+                'total_price'    => $order->total_price,
+                'items'          => $order->items->map(function ($item) {
+                    return [
+                        'product_id' => $item->product_id,
+                        'name'       => $item->name,   // accessor
+                        'quantity'   => $item->quantity,
+                        'price'      => $item->price,  // unit price
+                    ];
+                }),
+            ];
+        });
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_id' => 'required|integer|exists:customers,id',
-            'products'    => 'required|array',
-            'products.*.product_id' => 'required|integer|exists:products,id',
-            'products.*.quantity'   => 'required|integer|min:1',
+            'customer_id'        => 'required|integer|exists:customers,id',
+            'items'              => 'required|array',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.quantity'   => 'required|integer|min:1',
         ]);
 
-        // create order
         $order = Order::create([
-            'customer_id' => $validated['customer_id'],
-            'total_price' => 0,
-            'status'      => 'pending',
+            'customer_id'    => $validated['customer_id'],
+            'total_price'    => 0,
+            'total_quantity' => 0,
+            'status'         => 'pending',
         ]);
 
-        $total = 0;
+        $totalPrice = 0;
+        $totalQuantity = 0;
 
-        // add order items
-        foreach ($validated['products'] as $product) {
-            $price = \App\Models\Product::find($product['product_id'])->price;
-            $subtotal = $price * $product['quantity'];
+        foreach ($validated['items'] as $item) {
+            $product = Product::find($item['product_id']);
+            $subtotal = $product->price * $item['quantity'];
 
             OrderItem::create([
                 'order_id'   => $order->id,
-                'product_id' => $product['product_id'],
-                'quantity'   => $product['quantity'],
-                'price'      => $subtotal,
+                'product_id' => $item['product_id'],
+                'quantity'   => $item['quantity'],
+                'price'      => $product->price, // unit price
             ]);
 
-            $total += $subtotal;
+            $totalPrice += $subtotal;
+            $totalQuantity += $item['quantity'];
         }
 
-        $order->update(['total_price' => $total]);
+        $order->update([
+            'total_price'    => $totalPrice,
+            'total_quantity' => $totalQuantity,
+        ]);
 
-        return $order->load('items.product');
+        return [
+            'id'             => $order->id,
+            'customer_id'    => $order->customer_id,
+            'total_quantity' => $order->total_quantity,
+            'total_price'    => $order->total_price,
+            'items'          => $order->items->map(function ($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'name'       => $item->name,
+                    'quantity'   => $item->quantity,
+                    'price'      => $item->price,
+                ];
+            }),
+        ];
     }
 
     public function show(Order $order)
     {
-        return $order->load('items.product', 'customer');
+        return [
+            'id'             => $order->id,
+            'customer_id'    => $order->customer_id,
+            'total_quantity' => $order->total_quantity,
+            'total_price'    => $order->total_price,
+            'items'          => $order->items->map(function ($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'name'       => $item->name,
+                    'quantity'   => $item->quantity,
+                    'price'      => $item->price,
+                ];
+            }),
+        ];
     }
 
     public function update(Request $request, Order $order)
@@ -68,7 +116,21 @@ class OrderController extends Controller
         ]);
 
         $order->update($validated);
-        return $order->load('items.product', 'customer');
+
+        return [
+            'id'             => $order->id,
+            'customer_id'    => $order->customer_id,
+            'total_quantity' => $order->total_quantity,
+            'total_price'    => $order->total_price,
+            'items'          => $order->items->map(function ($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'name'       => $item->name,
+                    'quantity'   => $item->quantity,
+                    'price'      => $item->price,
+                ];
+            }),
+        ];
     }
 
     public function destroy(Order $order)

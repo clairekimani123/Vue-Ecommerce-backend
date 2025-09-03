@@ -12,6 +12,9 @@ class OrderItem extends Model
         'price',
     ];
 
+    protected $appends = ['name'];
+
+
     public function order()
     {
         return $this->belongsTo(Order::class);
@@ -22,7 +25,12 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
-    
+    public function getNameAttribute()
+{
+    return $this->product ? $this->product->name : null;
+}
+
+
 
 }
 

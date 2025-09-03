@@ -24,6 +24,7 @@ class SupplierController extends Controller
             'location' => 'nullable|string|max:255',
             'phone'    => 'required|string|unique:suppliers,phone',
             'email'    => 'required|email|unique:suppliers,email',
+            'password' => 'required|string|min:8|confirmed', // 'confirmed' requires password_confirmation
         ]);
 
         return Supplier::create($validated);
@@ -41,6 +42,7 @@ class SupplierController extends Controller
             'location' => 'nullable|string|max:255',
             'phone'    => 'string|unique:suppliers,phone,' . $supplier->id,
             'email'    => 'email|unique:suppliers,email,' . $supplier->id,
+            'password' => 'sometimes|string|min:8|confirmed', // Optional, requires password_confirmation
         ]);
 
         $supplier->update($validated);

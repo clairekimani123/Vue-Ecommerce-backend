@@ -8,8 +8,11 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'total_price',
+        'total_quantity',
+
         'status', // pending, completed, cancelled
     ];
+
 
     public function customer()
 {
