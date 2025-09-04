@@ -30,7 +30,26 @@ class CustomerController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
-        return Customer::create($validated);
+
+         $customer = Customer::create($validated);
+
+         dd($customer);
+
+         if($customer){
+
+            return response()->json(['message' => 'Customer created successfully'], 201);
+
+         }else{
+
+            return response()->json(['message' => 'Customer creation failed']);
+
+         }
+
+        //  dd($customer);
+
+        // return Customer::create($validated);
+
+        // return response()->json($customer, 201);
     }
 
     public function show(Customer $customer)
